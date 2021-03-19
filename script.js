@@ -75,41 +75,34 @@ const displayMovements = (movements) => {
 
         containerMovements.insertAdjacentHTML('afterbegin', html);
     });
-
 };
 
-displayMovements(account1.movements);
+const calcAndDisplayBalance = (anyAccount) => {
+    anyAccount.balance = anyAccount.movements.reduce((acc, curr) => acc + curr, 0);
 
-const calcAndDisplayBalance = (allMovements) => {
-    const balance = allMovements.reduce((acc, curr) => acc + curr, 0);
-
-    labelBalance.textContent = `${balance} EUR`;
+    labelBalance.textContent = `${anyAccount.balance} EUR`;
 }
 
-calcAndDisplayBalance(account2.movements);
-
-const calcDisplaySummary = (movements) => {
-    const incomes = movements
+const calcDisplaySummary = (anyAccount) => {
+    const incomes = anyAccount.movements
         .filter(move => move > 0)
         .reduce((acc, curr) => acc + curr, 0);
 
     labelSumIn.textContent = `${incomes} EUR`;
 
-    const out = movements.filter(move => move < 0)
+    const out = anyAccount.movements.filter(move => move < 0)
         .reduce((acc, curr) => acc + curr);
 
     labelSumOut.textContent = `${Math.abs(out)} EUR`;
 
-    const interest = movements
+    const interest = anyAccount.movements
         .filter(move => move > 0)
-        .map(deposit => deposit * 1.2 / 100)
+        .map(deposit => (deposit * anyAccount.interestRate) / 100)
         .filter((element) => element >= 1)
         .reduce((acc, curr) => acc + curr);
 
     labelSumInterest.textContent = `${interest} EUR`;
 };
-
-calcDisplaySummary(account1.movements);
 
 const createUserName = (accountArr) => {
     accountArr.forEach(acc => {
@@ -123,6 +116,11 @@ const createUserName = (accountArr) => {
 
 createUserName(accounts);
 
+const updateUI =(currentAcc) => {
+    calcAndDisplayBalance(currentAcc);
+    calcDisplaySummary(currentAcc);
+    displayMovements(currentAcc.movements);
+}
 
 // const user = 'Steven Thomas Williams';
 // //stw
@@ -131,6 +129,50 @@ createUserName(accounts);
 // let userName222 = user.toLowerCase().split(' ').map(n => n.slice(0, 1)).join('');
 // console.log(userName222);
 
+let currentAccount;
+
+btnLogin.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    currentAccount = accounts.find(acc =>
+        acc.username === inputLoginUsername.value
+    );
+    console.log('currentAccount: ', currentAccount);
+
+
+    if (currentAccount.pin && currentAccount.pin === Number(inputLoginPin.value)) {
+
+        labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(' ')[0]}`;
+        containerApp.style.opacity = 100;
+        inputLoginUsername.value = '';
+        inputLoginPin.value = '';
+        inputLoginPin.blur();
+        updateUI(currentAccount);
+    }
+});
+
+btnTransfer.addEventListener('click', (event) => {
+    event.preventDefault();
+    const amountToTransfer = Number(inputTransferAmount.value);
+
+    const recriverAccount = accounts.find(acc => acc.username === inputTransferTo.value);
+    console.log('transfer button was clicked')
+    console.log('person to transfer: ', recriverAccount);
+    console.log('amount: ', amountToTransfer);
+
+    inputTransferAmount.value = inputTransferTo.value = '';
+
+    if(amountToTransfer > 0 && currentAccount.balance >= amountToTransfer
+        && recriverAccount && recriverAccount !== currentAccount){
+
+        //doing the transfer
+        currentAccount.movements.push(-amountToTransfer);
+        recriverAccount.movements.push(amountToTransfer);
+
+        updateUI(currentAccount);
+    }
+
+});
 
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -196,8 +238,6 @@ const currencies = new Map([
 
 const euroToUsd = 1.1;
 const movementsUSD = movements.map(move => move * euroToUsd);
-console.log(movements);
-console.log(movementsUSD);
 
 
 // const movementsDescriptions = movements.map((move, i, arr) => {
@@ -208,18 +248,14 @@ console.log(movementsUSD);
 const movementsDescriptions = movements.map((move, i) =>
     `${i + 1} You ${move > 0 ? 'deposit' : 'withdrawal'} ${Math.abs(move)} \n`
 );
-console.log(movementsDescriptions);
 
 
 ///create array of deposits
 const deposits = movements.filter(move => move > 0);
 const withdrawals = movements.filter(move => move < 0);
-console.log(deposits);
-console.log(withdrawals);
 
 //calculate balance
 const balance = movements.reduce((acc, curr, index, arr) => acc + curr, 0);
-console.log('balance', balance);
 
 let res = 0;
 console.log(movements.forEach(move => {
@@ -237,7 +273,6 @@ const max = movements.reduce((acc, curr, index, arr) => {
         return curr;
     }
 }, movements[0]);
-console.log('max: ', max);
 
 //
 const depositInUSD = (movements) => {
@@ -245,14 +280,10 @@ const depositInUSD = (movements) => {
         .map(move => move * euroToUsd)
         .reduce((acc, curr) => acc + curr);
 };
-console.log("deposit in usd", depositInUSD(movements));
 
 const firstWithdrawal = movements.find(move => move < 0);
-console.log(firstWithdrawal);
 
 const account = accounts.find(acc => acc.owner === 'Sarah Smith');
-console.log('found account: ', account);
-console.log('*******')
 for (let acc of accounts) {
     if (acc.owner === 'Sarah Smith') {
         console.log(acc);
