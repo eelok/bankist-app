@@ -116,7 +116,7 @@ const createUserName = (accountArr) => {
 
 createUserName(accounts);
 
-const updateUI =(currentAcc) => {
+const updateUI = (currentAcc) => {
     calcAndDisplayBalance(currentAcc);
     calcDisplaySummary(currentAcc);
     displayMovements(currentAcc.movements);
@@ -162,8 +162,8 @@ btnTransfer.addEventListener('click', (event) => {
 
     inputTransferAmount.value = inputTransferTo.value = '';
 
-    if(amountToTransfer > 0 && currentAccount.balance >= amountToTransfer
-        && recriverAccount && recriverAccount !== currentAccount){
+    if (amountToTransfer > 0 && currentAccount.balance >= amountToTransfer
+        && recriverAccount && recriverAccount !== currentAccount) {
 
         //doing the transfer
         currentAccount.movements.push(-amountToTransfer);
@@ -174,6 +174,23 @@ btnTransfer.addEventListener('click', (event) => {
 
 });
 
+
+btnClose.addEventListener('click', (event) => {
+    event.preventDefault();
+
+    if( inputCloseUsername.value && +inputClosePin.value
+        && inputCloseUsername.value === currentAccount.username
+        && +inputClosePin.value === currentAccount.pin
+    ) {
+        console.log('user name & pin are valid');
+        const index = accounts.findIndex(acc => acc.username === currentAccount.username);
+
+        accounts.splice(index, 1);
+        containerApp.style.opacity = 0;
+
+    }
+    inputCloseUsername.value = inputClosePin.value = '';
+});
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
 // LECTURES
