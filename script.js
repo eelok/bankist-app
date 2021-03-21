@@ -61,10 +61,12 @@ const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 const inputCloseUsername = document.querySelector('.form__input--user');
 const inputClosePin = document.querySelector('.form__input--pin');
 
-const displayMovements = (movements) => {
+const displayMovements = (movements, sort = false) => {
     containerMovements.innerHTML = '';
 
-    movements.map((move, index) => {
+    const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+
+    movs.map((move, index) => {
         const type = move > 0 ? 'deposit' : 'withdrawal';
 
         const html = `
@@ -174,11 +176,23 @@ btnTransfer.addEventListener('click', (event) => {
 
 });
 
+btnLoan.addEventListener('click', event => {
+    event.preventDefault();
+    console.log('loan was clicked');
+    const loanAmount = Number(inputLoanAmount.value);
+    if (loanAmount > 0 && currentAccount.movements.some(move => move >= (loanAmount) / 10)) {
+        currentAccount.movements.push(Number(inputLoanAmount.value));
+        updateUI(currentAccount);
+        console.log('lone is approved');
+    }
+
+    inputLoanAmount.value = '';
+});
 
 btnClose.addEventListener('click', (event) => {
     event.preventDefault();
 
-    if( inputCloseUsername.value && +inputClosePin.value
+    if (inputCloseUsername.value && +inputClosePin.value
         && inputCloseUsername.value === currentAccount.username
         && +inputClosePin.value === currentAccount.pin
     ) {
@@ -190,6 +204,13 @@ btnClose.addEventListener('click', (event) => {
 
     }
     inputCloseUsername.value = inputClosePin.value = '';
+});
+
+let sorted = false;
+btnSort.addEventListener('click', event => {
+    event.preventDefault();
+    displayMovements(currentAccount.movements, !sorted);
+    sorted = !sorted;
 });
 /////////////////////////////////////////////////
 /////////////////////////////////////////////////
@@ -306,3 +327,20 @@ for (let acc of accounts) {
         console.log(acc);
     }
 }
+
+console.log('>>>>>>>>>');
+console.log(movements);
+//equality
+console.log(movements.includes(-130));
+console.log('>>>>>>>>>');
+//some condition
+console.log(movements.some(mov => mov < 200));
+console.log('>>>>>>>>>');
+//every condition
+console.log('>>>>> any condition >>>>');
+console.log(movements.every(move => move > 0));
+console.log(account4.movements.every(tr => tr > 0));
+//separate callback
+console.log('all movements >>>>>>>>>');
+const allMovements = accounts.map(acc => acc.movements);
+console.log(allMovements)
