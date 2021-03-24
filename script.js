@@ -343,4 +343,41 @@ console.log(account4.movements.every(tr => tr > 0));
 //separate callback
 console.log('all movements >>>>>>>>>');
 const allMovements = accounts.map(acc => acc.movements);
-console.log(allMovements)
+console.log(allMovements);
+
+console.log("<<<<<<<<<")
+const depositInAllAccount = accounts.flatMap(acc => acc.movements)
+    .filter(move => move > 0)
+    .reduce((acc, currValue) => acc + currValue, 0);
+console.log(depositInAllAccount);
+
+// const numDeposit100 = accounts.flatMap(acc => acc.movements)
+// .filter(move => move >= 1000).length;
+
+const numDeposit100 = accounts.flatMap(acc => acc.movements)
+    .filter(move => move >= 1000)
+    .reduce((counter, currValue) => currValue >= 1000 ? counter + 1 : counter, 0);
+
+console.log(numDeposit100);
+
+//calculate all the deposits and withdrawals separately
+const depositsAndWithdrawalsSum = accounts.flatMap(acc => acc.movements)
+    .reduce((sums, curr) => {
+        curr > 0 ? sums.deposits += curr : sums.withdrawals += curr;
+        return sums;
+    }, {deposits: 0, withdrawals: 0});
+
+console.log(depositsAndWithdrawalsSum);
+
+const convertTitleCase = (title) => {
+    const exceptions = ['a', 'an', 'but', 'and', 'or', 'on', 'in', 'with', 'the'];
+    const capitalize = str => str[0].toUpperCase() + str.slice(1);
+
+    const titleCase = title.toLowerCase()
+        .split(" ")
+        .map(word =>
+            (exceptions.includes(word) ? word : capitalize(word)))
+        .join(' ');
+    return capitalize(titleCase);
+};
+console.log(convertTitleCase('and this is a nice title'));
